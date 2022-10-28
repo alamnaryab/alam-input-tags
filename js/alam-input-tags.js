@@ -1,0 +1,160 @@
+;(function ( $ ) {
+    $.fn.alamInputTags = function( options ) {
+        var elem = this;
+        var ajxReq=null;
+
+
+        var opt = $.extend({ 
+            url:'http://localhost/test/alaminputtags/src.php',
+            maxItems:5, 
+            data:[],
+        }, options );
+        
+        elem.addClass( "txt-alam-input-tags" );
+        elem.wrap( "<div class='alam-input-tags-wrapper'></div>" );
+        $('.alam-input-tags-wrapper').prepend('<div class="tags-wrapper d-inline"></div>');
+        elem.wrap( "<div class='alam-input-wrapper d-inline-block position-relative'></div>" );
+        $('.alam-input-wrapper').append('<div class="drp-wrapper position-absolute"></div>');
+        var inputName = elem.attr('name')?elem.attr('name'):'unnamed';
+        var inputValue = elem.attr('value')?elem.attr('value'):'';
+        elem.after('<input type="text" name="'+inputName+'" value="'+inputValue+'" class="txtVals" style="display:none;">');
+        
+        elem.removeAttr('name');
+        elem.val('');
+
+        $.ajax({
+            url:opt.url,
+            beforeSend:function(){
+                if(ajxReq!=null){
+                    ajxReq.abort();
+                }
+            },success:function(resp){
+                try{
+                    var obj = JSON.parse(resp);
+                    opt.data = obj;
+                    createTags(inputValue);
+                }catch(err){
+                    console.log(err);
+                }
+            },error:function(){
+                console.log('ajax error');
+            }
+        });
+ 
+        $('body').on('click','.alam-input-tags-wrapper',function(e){
+            $(this).find('.txt-alam-input-tags').focus();
+        });
+        $('body').on('click','.alam-input-tags a.dropdown-item',function(e){
+            e.preventDefault();
+            var id = $(this).attr('data-id');
+            var txt = $(this).text(); 
+            var thisWrapper = $(this).parents('.alam-input-tags-wrapper');
+            var thisTagsWrapper = thisWrapper.find('.tags-wrapper');
+            var thisTxt = thisWrapper.find('.txt-alam-input-tags');
+            var thisTxtVals = thisWrapper.find('.txtVals');
+            //var thisdrpWrapper = thisWrapper.find('.drp-wrapper');
+            var thisClass = $(this).attr('data-class');
+            thisTagsWrapper.append('<span class="badge badge-'+thisClass+' m-1"><span class="txt" data-id="'+id+'">'+txt+'</span> <span class="btn-remove">&times;</span> </span>');
+            thisTxt.val('').trigger('keyup').focus();
+            thisTxtVals.val(getSelectedIdsCSV());
+        });
+
+        $('body').on('click','.btn-remove',function(e){
+            e.preventDefault();
+            var thisWrapper = $(this).parents('.alam-input-tags-wrapper'); 
+            var thisTxt = thisWrapper.find('.txt-alam-input-tags');
+            var thisTxtVals = thisWrapper.find('.txtVals');
+            $(this).parents('.badge').remove();
+            thisTxtVals.val(getSelectedIdsCSV());
+            thisTxt.focus();
+        });
+
+        function createTags(inputValue){
+            var arr = inputValue.split(",");
+            var selectedItems = opt.data.filter(function(i){
+                return $.inArray(i.id+"" ,arr )!= -1;
+            });
+            
+            var thisWrapper = $('.alam-input-tags-wrapper');
+            var thisTagsWrapper = thisWrapper.find('.tags-wrapper'); 
+            $.each(selectedItems,function(i,item){
+                thisTagsWrapper.append('<span class="badge badge-'+item.class+' m-1"><span class="txt" data-id="'+item.id+'">'+item.name+'</span> <span class="btn-remove">&times;</span> </span>');
+            });
+        }
+
+        function getSelectedIdsArr(){
+            var ids = [];
+            $('.alam-input-tags-wrapper .tags-wrapper .txt').each(function(){  
+                ids.push($(this).attr('data-id'));
+            }); 
+            return ids;
+        }
+        function getSelectedIdsCSV(){
+            var ids = getSelectedIdsArr(); 
+            var idz = ids.join(',');
+            return idz;
+        }
+        
+        function removeAlreadySelected(obj){
+            var selectedIds = getSelectedIdsArr(); 
+            for (var i = obj.length - 1; i >= 0; --i) {  
+                if ($.inArray(obj[i].id+"" ,selectedIds )!= -1 ) { 
+                    obj.splice(i,1);
+                }
+            }
+            return obj;
+        }
+
+        elem.bind("keydown.alamInputTags", function (e) {
+             
+            var thisInput = $(this);//elem[0];
+            var thisWrapper = thisInput.parents('.alam-input-tags-wrapper');
+            var thisTagsWrapper = thisWrapper.find('.tags-wrapper');
+            var thisdrpWrapper = thisWrapper.find('.drp-wrapper');
+            var thisVal = thisInput.val().trim();
+            var lastBadge = thisTagsWrapper.find('.badge:last-child');
+            var drpMenuItem = thisdrpWrapper.find('a.dropdown-item'); 
+            if(thisVal =="" && e.which==8 && lastBadge.length==1){
+                lastBadge.remove();
+            } 
+            else if(thisVal !="" && e.which==13 && drpMenuItem.length==1){
+                console.log('sdfsdf');
+                drpMenuItem.trigger('click');
+            } 
+        });
+         
+        return elem.bind("keyup.alamInputTags", function (e) {
+             
+            var thisInput = $(this);//elem[0];
+            var thisWrapper = thisInput.parents('.alam-input-tags-wrapper');
+            var thisTagsWrapper = thisWrapper.find('.tags-wrapper');
+            var thisdrpWrapper = thisWrapper.find('.drp-wrapper');
+            var thisVal = thisInput.val().trim();
+            
+            if(thisVal!=""){
+                thisdrpWrapper.show();
+                thisdrpWrapper.html('<div class="text-center"><span><i class="fa fa-spin fa-spinner"></i> Loading</span></div>');
+                 
+                var obj = removeAlreadySelected(opt.data);
+
+                var filteredList = obj.filter(i=> i.name.toLowerCase().includes(thisVal.toLowerCase()));
+
+                if(filteredList.length > 0){ 
+                    var str = '<div class="alam-input-tags dropdown-menu show">';
+                    filteredList = filteredList.slice(0, opt.maxItems);
+                    $.each(filteredList,function(i,v){
+                        str+='<a class="dropdown-item  b-'+v.class+'" data-class="'+v.class+'" data-id="'+v.id+'" href="#">'+v.name+'</a>';
+                    });
+                    str+='</div>';
+                    thisdrpWrapper.html(str); 
+                }else{
+                    thisdrpWrapper.html('');
+                    thisdrpWrapper.hide();
+                }
+                
+            }else{
+                thisdrpWrapper.hide();
+            } 
+        }); 
+    };
+}( jQuery ));
