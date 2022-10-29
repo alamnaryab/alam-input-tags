@@ -9,6 +9,7 @@
             maxItems:0, 
             maxSuggessions:5, 
             data:[], 
+            fieldMappings:null
         }, options );
         
         elem.addClass( "txt-alam-input-tags" );
@@ -34,6 +35,7 @@
                     try{
                         var obj = JSON.parse(resp);
                         opt.data = obj;
+                        mapData();
                         createTags(inputValue);
                     }catch(err){
                         console.log(err);
@@ -43,12 +45,16 @@
                 }
             });
         }else{
+            mapData();
             createTags(inputValue); 
         }
+
+
             
-            $('body').on('click','.alam-input-tags-wrapper',function(e){
+        $('body').on('click','.alam-input-tags-wrapper',function(e){
             $(this).find('.txt-alam-input-tags').focus();
         });
+
         $('body').on('click','.alam-input-tags a.dropdown-item',function(e){
             e.preventDefault();
             var id = $(this).attr('data-id');
@@ -86,6 +92,19 @@
             thisTxtVals.val(getSelectedIdsCSV());
             thisTxt.focus();
         });
+
+        function mapData(){
+            if(opt.fieldMappings!=null){
+                var data = opt.data.map(function(item){
+                    return {
+                        id      : item[opt.fieldMappings.id],
+                        name    : item[opt.fieldMappings.name],
+                        class   : item[opt.fieldMappings.class],
+                    }
+                });
+                opt.data = data;
+            }
+        }
 
         function createTags(inputValue){
             var arr = inputValue.split(","); 
