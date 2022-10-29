@@ -76,11 +76,17 @@
             thisTxtVals.val(getSelectedIdsCSV());
         });
 
-        $('body').click(function(){
-            console.log(22);
+        $('body').click(function(){ 
             var thisWrapper = $('.alam-input-tags-wrapper'); 
             var thisdrpWrapper = thisWrapper.find('.drp-wrapper');
             thisdrpWrapper.hide();
+        });
+        $('body').keydown(function(e){ 
+            if(e.which==27){
+                var thisWrapper = $('.alam-input-tags-wrapper'); 
+                var thisdrpWrapper = thisWrapper.find('.drp-wrapper');
+                thisdrpWrapper.hide();
+            }
         });
 
         $('body').on('click','.btn-remove',function(e){
@@ -183,8 +189,12 @@
             var thisTagsWrapper = thisWrapper.find('.tags-wrapper');
             var thisdrpWrapper = thisWrapper.find('.drp-wrapper');
             var thisVal = thisInput.val().trim();
-            
-            if(thisVal!=""){
+            if(e.which==27){
+                var thisWrapper = $('.alam-input-tags-wrapper'); 
+                var thisdrpWrapper = thisWrapper.find('.drp-wrapper');
+                thisdrpWrapper.hide();
+            }
+            else if(thisVal!=""){
                 thisdrpWrapper.show();
                 thisdrpWrapper.html('<div class="text-center"><span><i class="fa fa-spin fa-spinner"></i> Loading</span></div>');
                  
