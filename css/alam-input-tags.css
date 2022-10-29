@@ -10,15 +10,20 @@
 .txt-alam-input-tags:focus{ 
     box-shadow: none;
 }
+.alam-input-tags-wrapper .dropdown-item:focus{
+    background:blue;
+    color:#FFF;
+    outline: none;
+}
 .alam-input-tags-wrapper .dropdown-item{
     border-left:5px solid transparent;
 }
-.alam-input-tags-wrapper .dropdown-item.b-success{
+/* .alam-input-tags-wrapper .dropdown-item.border-success{
     border-color:green;
 }
-.alam-input-tags-wrapper .dropdown-item.b-danger{
+.alam-input-tags-wrapper .dropdown-item.border-danger{
     border-color:red;
-}
+} */
 .alam-input-tags-wrapper .tags-wrapper .badge .btn-remove{
     cursor:pointer;
 }

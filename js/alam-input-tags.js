@@ -5,9 +5,9 @@
 
 
         var opt = $.extend({ 
-            url:'http://localhost/test/alaminputtags/src.php',
+            url:null, 
             maxItems:5, 
-            data:[],
+            data:[], 
         }, options );
         
         elem.addClass( "txt-alam-input-tags" );
@@ -22,26 +22,30 @@
         elem.removeAttr('name');
         elem.val('');
 
-        $.ajax({
-            url:opt.url,
-            beforeSend:function(){
-                if(ajxReq!=null){
-                    ajxReq.abort();
+        if(opt.url!=null){
+            $.ajax({
+                url:opt.url,
+                beforeSend:function(){
+                    if(ajxReq!=null){
+                        ajxReq.abort();
+                    }
+                },success:function(resp){
+                    try{
+                        var obj = JSON.parse(resp);
+                        opt.data = obj;
+                        createTags(inputValue);
+                    }catch(err){
+                        console.log(err);
+                    }
+                },error:function(){
+                    console.log('ajax error');
                 }
-            },success:function(resp){
-                try{
-                    var obj = JSON.parse(resp);
-                    opt.data = obj;
-                    createTags(inputValue);
-                }catch(err){
-                    console.log(err);
-                }
-            },error:function(){
-                console.log('ajax error');
-            }
-        });
- 
-        $('body').on('click','.alam-input-tags-wrapper',function(e){
+            });
+        }else{
+            createTags(inputValue); 
+        }
+            
+            $('body').on('click','.alam-input-tags-wrapper',function(e){
             $(this).find('.txt-alam-input-tags').focus();
         });
         $('body').on('click','.alam-input-tags a.dropdown-item',function(e){
@@ -51,8 +55,7 @@
             var thisWrapper = $(this).parents('.alam-input-tags-wrapper');
             var thisTagsWrapper = thisWrapper.find('.tags-wrapper');
             var thisTxt = thisWrapper.find('.txt-alam-input-tags');
-            var thisTxtVals = thisWrapper.find('.txtVals');
-            //var thisdrpWrapper = thisWrapper.find('.drp-wrapper');
+            var thisTxtVals = thisWrapper.find('.txtVals'); 
             var thisClass = $(this).attr('data-class');
             thisTagsWrapper.append('<span class="badge badge-'+thisClass+' m-1"><span class="txt" data-id="'+id+'">'+txt+'</span> <span class="btn-remove">&times;</span> </span>');
             thisTxt.val('').trigger('keyup').focus();
@@ -70,7 +73,7 @@
         });
 
         function createTags(inputValue){
-            var arr = inputValue.split(",");
+            var arr = inputValue.split(","); 
             var selectedItems = opt.data.filter(function(i){
                 return $.inArray(i.id+"" ,arr )!= -1;
             });
@@ -114,13 +117,29 @@
             var thisVal = thisInput.val().trim();
             var lastBadge = thisTagsWrapper.find('.badge:last-child');
             var drpMenuItem = thisdrpWrapper.find('a.dropdown-item'); 
+             
             if(thisVal =="" && e.which==8 && lastBadge.length==1){
                 lastBadge.remove();
             } 
-            else if(thisVal !="" && e.which==13 && drpMenuItem.length==1){
-                console.log('sdfsdf');
+            else if(thisVal !="" && e.which==13 && drpMenuItem.length==1){ 
                 drpMenuItem.trigger('click');
+            } else if(thisVal !="" && e.which==40 && drpMenuItem.length>=1){ 
+                thisdrpWrapper.find('a.dropdown-item:first-child').focus();
             } 
+        });
+
+        $('body').on('keydown','.alam-input-tags-wrapper a.dropdown-item',function(e){
+            //e.preventDefault();
+            var menuItms = $('.alam-input-tags-wrapper a.dropdown-item');
+            var indx = $(this).index();
+            if(indx == menuItms.length-1){
+                indx=-1;
+            }
+            if(e.which==40){ 
+                menuItms.eq(indx+1).focus();
+            }else if(e.which==38){
+                menuItms.eq(indx-1).focus();
+            }
         });
          
         return elem.bind("keyup.alamInputTags", function (e) {
@@ -136,14 +155,14 @@
                 thisdrpWrapper.html('<div class="text-center"><span><i class="fa fa-spin fa-spinner"></i> Loading</span></div>');
                  
                 var obj = removeAlreadySelected(opt.data);
-
+                 
                 var filteredList = obj.filter(i=> i.name.toLowerCase().includes(thisVal.toLowerCase()));
 
                 if(filteredList.length > 0){ 
                     var str = '<div class="alam-input-tags dropdown-menu show">';
                     filteredList = filteredList.slice(0, opt.maxItems);
                     $.each(filteredList,function(i,v){
-                        str+='<a class="dropdown-item  b-'+v.class+'" data-class="'+v.class+'" data-id="'+v.id+'" href="#">'+v.name+'</a>';
+                        str+='<a class="dropdown-item  border-'+v.class+'" data-class="'+v.class+'" data-id="'+v.id+'" href="#">'+v.name+'</a>';
                     });
                     str+='</div>';
                     thisdrpWrapper.html(str); 
