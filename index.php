@@ -12,7 +12,8 @@
     <script>
         $(function(){
             $('.alamInputTag').alamInputTags({
-                url:'src.html'
+                url:'src.html',
+                maxItems:4,
             });
         });
     </script>
@@ -71,7 +72,8 @@
 
 $(function(){
     $('.alamInputTag').alamInputTags({ 
-        maxItems:5, //optional 
+        maxSuggessions:5, //optional 
+        maxItems:10,
     //url:'src.html', 
     data:[ 
             {"id":1,"name":"ifjr","class":"danger"},
@@ -83,7 +85,8 @@ $(function(){
 });
         </pre>
         <ul>
-            <li><strong>maxItems</strong> (suggested items) its optional if not provided it will take default 5</li>
+            <li><strong>maxSuggessions</strong> its optional if not provided it will take default 5</li>
+            <li><strong>maxItems</strong> its optional if not provided it will take default 0 which means no limit</li>
             <li><strong>url</strong> url or data one should be there, If both url and data given then data will be overwritten </li>
             <li><strong>data</strong> data should be JSON array of objects, the same format will be required in URL too</li>
         </ul>

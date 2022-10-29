@@ -6,7 +6,8 @@
 
         var opt = $.extend({ 
             url:null, 
-            maxItems:5, 
+            maxItems:0, 
+            maxSuggessions:5, 
             data:[], 
         }, options );
         
@@ -54,12 +55,26 @@
             var txt = $(this).text(); 
             var thisWrapper = $(this).parents('.alam-input-tags-wrapper');
             var thisTagsWrapper = thisWrapper.find('.tags-wrapper');
+
+            var totalBadges = thisTagsWrapper.find('.badge').length;
+            if(opt.maxItems>0 &&  totalBadges >= opt.maxItems){
+                alert('Max '+opt.maxItems+' items are allowed');
+                return false;
+            }
+
             var thisTxt = thisWrapper.find('.txt-alam-input-tags');
             var thisTxtVals = thisWrapper.find('.txtVals'); 
             var thisClass = $(this).attr('data-class');
             thisTagsWrapper.append('<span class="badge badge-'+thisClass+' m-1"><span class="txt" data-id="'+id+'">'+txt+'</span> <span class="btn-remove">&times;</span> </span>');
             thisTxt.val('').trigger('keyup').focus();
             thisTxtVals.val(getSelectedIdsCSV());
+        });
+
+        $('body').click(function(){
+            console.log(22);
+            var thisWrapper = $('.alam-input-tags-wrapper'); 
+            var thisdrpWrapper = thisWrapper.find('.drp-wrapper');
+            thisdrpWrapper.hide();
         });
 
         $('body').on('click','.btn-remove',function(e){
@@ -116,8 +131,8 @@
             var thisdrpWrapper = thisWrapper.find('.drp-wrapper');
             var thisVal = thisInput.val().trim();
             var lastBadge = thisTagsWrapper.find('.badge:last-child');
-            var drpMenuItem = thisdrpWrapper.find('a.dropdown-item'); 
-             
+            var drpMenuItem = thisdrpWrapper.find('a.dropdown-item');  
+
             if(thisVal =="" && e.which==8 && lastBadge.length==1){
                 lastBadge.remove();
             } 
@@ -160,7 +175,7 @@
 
                 if(filteredList.length > 0){ 
                     var str = '<div class="alam-input-tags dropdown-menu show">';
-                    filteredList = filteredList.slice(0, opt.maxItems);
+                    filteredList = filteredList.slice(0, opt.maxSuggessions);
                     $.each(filteredList,function(i,v){
                         str+='<a class="dropdown-item  border-'+v.class+'" data-class="'+v.class+'" data-id="'+v.id+'" href="#">'+v.name+'</a>';
                     });
