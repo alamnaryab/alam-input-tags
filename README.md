@@ -8,6 +8,9 @@
 - Configurable max number of items to select
 - Fields mapping
 
+## Demo
+[demo link](https://demo.alampk.com/alam-input-tags-jquery-plugin/)
+
 ## How to use it
 Include these css and js files in your page
 ```html
